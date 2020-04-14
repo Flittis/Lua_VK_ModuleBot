@@ -18,6 +18,10 @@ local vk = {
     callbacks = {}
 }
 
+function vk.init(token) vk.token = token end
+function vk.longpollStop() vk.longPollWork = false end
+function vk:on(cbtype, cbfunc) self.callbacks[cbtype] = cbfunc end
+
 function vk.longpollStart()
     print("[LOG]\tStarting LongPoll")
     local lpGet = vk.longpollGet()
@@ -33,12 +37,6 @@ function vk.longpollStart()
       vk.longpollListen()
     end
 end
-
-function vk.init(token) vk.token = token end
-function vk.longpollStop() vk.longPollWork = false end
-function vk:on(cbtype, cbfunc) self.callbacks[cbtype] = cbfunc end
-
-
 
 function vk.call(method, parameters, notLog)
     if not vk.token then return { error = "Access token is not defined" } end
@@ -128,7 +126,6 @@ function vk.parseLongPoll(data)
     function msg.reply(message) vk.call("messages.send", { peer_id = msg.peer_id, reply_to = msg.id, message = message }) end
     function msg.forward(peer_id, message) vk.call("messages.send", { peer_id = peer_id, forward_messages = msg.id, message = message or "" }) end
     function msg.edit(message) vk.call("messages.send", { peer_id = msg.peer_id, message_id = msg.id, message = message }) end
-    
 
     return msg
 end

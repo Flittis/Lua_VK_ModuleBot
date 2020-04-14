@@ -6,12 +6,7 @@ local obj = {}
 
 math.randomseed(os.time())
 function isInArray(a, v) for i = 1, #a do if a[i] == v then return true end end return false end
-function includes(a, v) 
-    for i = 1, #a do 
-        if v:find(a[i]) then return true end
-    end 
-    return false 
-end
+function includes(a, v)  for i = 1, #a do  if v:find(a[i]) then return true end end return false end
 
 function obj.func(msg)    -- creating callback function
     if(timeout[msg.peer_id] and os.time() > timeout[msg.peer_id]) then timeout[msg.peer_id] = nil end
