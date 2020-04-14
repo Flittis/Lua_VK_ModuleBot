@@ -125,6 +125,10 @@ function vk.parseLongPoll(data)
     if (msg.peer_id > 2e9) then msg.chat_id = msg.peer_id - 2e9 end
 
     function msg.send(message) vk.call("messages.send", { peer_id = msg.peer_id, message = message }) end
+    function msg.reply(message) vk.call("messages.send", { peer_id = msg.peer_id, reply_to = msg.id, message = message }) end
+    function msg.forward(peer_id, message) vk.call("messages.send", { peer_id = peer_id, forward_messages = msg.id, message = message or "" }) end
+    function msg.edit(message) vk.call("messages.send", { peer_id = msg.peer_id, message_id = msg.id, message = message }) end
+    
 
     return msg
 end
