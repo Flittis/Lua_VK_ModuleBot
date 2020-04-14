@@ -1,5 +1,5 @@
 local config = ...
-local stickerTriggerWords, stickerTriggerChats, stickerTriggerStickers, stickersTimeoutTime = config.stickerTriggerWords or {'ping'}, config.stickerTriggerChats or {}, config.stickerTriggerStickers or {1}, stickerTriggerTime or 5
+local stickerTriggerWords, stickerTriggerChats, stickerTriggerStickers, stickersTimeoutTime = config.stickerTriggerWords or {'ping'}, config.stickerTriggerChats or {}, config.stickerTriggerStickers or {1}, config.stickerTriggerTime or 5
 local timeout = {}
 
 local obj = {}
