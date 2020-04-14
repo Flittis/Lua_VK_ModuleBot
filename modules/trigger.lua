@@ -19,7 +19,7 @@ function obj.func(msg)    -- creating callback function
     if(timeout[msg.peer_id] == nil and msg.out == false and includes(stickerTriggerWords, msg.body:lower()) and (not stickerTriggerChats[1] or isInArray(stickerTriggerChats, msg.chat_id))) then
         vk.call('messages.send', { peer_id = msg.peer_id, sticker_id = stickerTriggerStickers[math.random(1, #stickerTriggerStickers)] })
 
-        timeout[msg.peer_id] = os.time() + (timeoutTime * 60)
+        timeout[msg.peer_id] = os.time() + (stickersTimeoutTime * 60)
     end
 end
 
