@@ -2,9 +2,7 @@ vk = require "vkapi"
 json = require "dkjson"
 local utf8 = require "lua-utf8"
 local lfs = require "lfs"
-
-local config = {}
-for k, v in pairs(require "config") do if k and v then config[k] = v end end
+local config = require "config"
 
 if not config.accessToken then
     print("[ERROR]\tAccess token in config is not defined")
