@@ -5,8 +5,8 @@ local lfs = require "lfs"
 local config = require "config"
 
 if not config.accessToken then
-    print("[ERROR]\tAccess token in config is not defined")
-    return os.exit()
+  print("[ERROR]\tAccess token in config is not defined")
+  return os.exit()
 end
 
 vk.init(config.accessToken)
@@ -30,7 +30,7 @@ for entry in lfs.dir("modules") do
 end
 
 vk:on('message', function(msg)    -- creating callback function
-    for i = 1, #modules do modules[i](msg) end
+  for i = 1, #modules do modules[i](msg) end
 end)
 
 for name, func in pairs(utf8)do if string[name]then string['_' .. name] = string[name];  string[name] = func end end
