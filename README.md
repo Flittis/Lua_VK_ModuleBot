@@ -34,7 +34,6 @@
 ```
 -$ luarocks install luautf8
 -$ luarocks install dkjson
--$ luarocks install luafilesystem
 ```
 
 ## Settings

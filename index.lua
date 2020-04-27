@@ -1,7 +1,6 @@
 vk = require "vkapi"
 json = require "dkjson"
 local utf8 = require "lua-utf8"
-local lfs = require "lfs"
 local config = require "config"
 
 if not config.accessToken then                              -- if access token in config file is not exist
@@ -12,21 +11,31 @@ end
 vk.init(config.accessToken)                                 -- init vkapi library
 
 local modules = {}                                                                    -- module table
-for entry in lfs.dir("modules") do                                                    -- for every file in "modules" folder
-  if entry == '.' or entry == '..' then                                               -- skip system files
-  elseif entry:sub(-4) == ".lua" then                                                 -- if file ends with .lua – loading
-    print(('[LOG]\tLoading module %q'):format(entry))
-    local chunk, err = loadfile("modules/" .. entry)                                  -- loading module file
-    if chunk then                                                                     -- if file loaded - continue
-      local succ, ret = pcall(chunk, config)                                          -- checking file for errors
-      if succ then                                                                    -- if no errors - continue
-        if type(ret.func) == 'function' then                                          -- if module has right structure
-          print(('[LOG]\tModule %q was loaded successfully'):format(entry))
-          table.insert(modules, ret.func)                                             -- insert module function in table
-        else print(('[ERROR]\tModule %q has wrong structure'):format(entry)) end
-      else print(('[ERROR]\tRuntime error in module %q: %s'):format(entry, ret)) end
-    else print(('[ERROR]\tError loading module %q: %s'):format(entry, err)) end
-  else print(("[ERROR]\tFile %q is not .lua file"):format(entry)) end
+
+function loadModule(name)
+	print(('[LOG]\tLoading module %q'):format(name))
+	local chunk, err = loadfile("modules/" .. name)                                  -- loading module file
+	if chunk then                                                                     -- if file loaded - continue
+		local succ, ret = pcall(chunk, config)                                          -- checking file for errors
+		if succ then                                                                    -- if no errors - continue
+			if type(ret.func) == 'function' then                                          -- if module has right structure
+				print(('[LOG]\tModule %q was loaded successfully'):format(name))
+				table.insert(modules, ret.func)                                             -- insert module function in table
+			else print(('[ERROR]\tModule %q has wrong structure'):format(name)) end
+		else print(('[ERROR]\tRuntime error in module %q: %s'):format(name, ret)) end
+	else print(('[ERROR]\tError loading module %q: %s'):format(name, err)) end
+end
+
+local handle = io.popen('ls modules', 'r')
+if handle then
+	for entry in handle:lines()do                                                   -- for every file in "modules" folder
+		if entry ~= '.' and entry ~= '..' then                                               -- skip system files
+			if entry:sub(-4) == ".lua" then                                                 -- if file ends with .lua – loading
+				loadModule(entry)
+			else print(("[ERROR]\tFile %q is not .lua file"):format(entry)) end
+		end
+	end
+	handle:close()
 end
 
 vk:on('message', function(msg)                                        -- creating callback function
