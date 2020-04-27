@@ -1,9 +1,10 @@
-local cURL = require "cURL"
-local json = require "dkjson"
-local bit = require (jit and "bit" or "bit32")
+require"curl.init"
+local json = require"dkjson"
+local bit = require"bit"
 
 local vk = {
   token = nil,
+	userAgent = "npm/VK-Promise",
   apiUrl = "https://api.vk.com/method/%s?%saccess_token=%s&v=5.69",
   longPollUrl = "https://%s?act=a_check&wait=25&mode=234&key=%s&ts=%s",
   longPollWork = false,
@@ -38,10 +39,10 @@ end
 
 function vk.call(method, parameters, notLog)
   if not vk.token then return { error = "Access token is not defined" } end
-  local paramstr, response, response_str = '', '', ''
+  local paramstr, response, response_str = "", "", ""
   if parameters then for key, value in pairs(parameters) do paramstr = paramstr .. key .. "=" .. value .. "&" end end
-
-  cURL.easy{ url = vk.apiUrl:format(method, paramstr or '&', vk.token), httpheader = { "user-agent: npm/VK-Promise" }, writefunction = function(res) response_str = response_str .. res end }:perform():close()
+	local url = vk.apiUrl:format(method, paramstr or "&", vk.token)
+	response_str = curl_request(url, vk.userAgent)
   response = json.decode(response_str, 1, nil)
 
   print("\n[REQUEST]\t( " .. method .. " " .. (paramstr or "") .. " ) \n[RESPONSE]\t" .. response_str .. "\n")
@@ -52,9 +53,10 @@ end
 
 function vk.longpollListen()
   if not (vk.longPollData.server and vk.longPollData.key and vk.longPollData.ts) then return "One of parameters are not provided."; end
-  local response = ''
+  local response = ""
 
-  cURL.easy{ url = vk.longPollUrl:format(vk.longPollData.server, vk.longPollData.key, vk.longPollData.ts), httpheader = { "user-agent: npm/VK-Promise" }, writefunction = function(res) response = response .. res end }:perform():close()
+	local url = vk.longPollUrl:format(vk.longPollData.server, vk.longPollData.key, vk.longPollData.ts)
+	response_str = curl_request(url, vk.userAgent)
   response = json.decode(response, 1, nil)
   if response.failed or response.error then return vk.longpollStart() end
 
