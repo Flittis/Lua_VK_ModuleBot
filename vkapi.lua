@@ -1,9 +1,6 @@
 local cURL = require "cURL"
 local json = require "dkjson"
-local bit = require "bit32"
-
-local logFile = io.open("vkapi.log", "a")
-io.output(logFile)
+local bit = require (jit and "bit" or "bit32")
 
 local vk = {
   token = nil,
@@ -18,11 +15,12 @@ local vk = {
   callbacks = {}
 }
 
-function vk.init(token) vk.token = token end
+function vk.init(token) if not token then return false end vk.token = token end
 function vk.longpollStop() vk.longPollWork = false end
 function vk:on(cbtype, cbfunc) self.callbacks[cbtype] = cbfunc end
 
 function vk.longpollStart()
+  vk.longPollWork = false
   print("[LOG]\tStarting LongPoll")
   local lpGet = vk.longpollGet()
   if lpGet and lpGet.error then
@@ -40,49 +38,30 @@ end
 
 function vk.call(method, parameters, notLog)
   if not vk.token then return { error = "Access token is not defined" } end
-  local paramstr
+  local paramstr, response, response_str = '', '', ''
+  if parameters then for key, value in pairs(parameters) do paramstr = paramstr .. key .. "=" .. value .. "&" end end
 
-  if parameters then for key, value in pairs(parameters) do paramstr = (paramstr and paramstr or "") .. key .. "=" .. value .. "&" end end
-  local url = vk.apiUrl:format(method, paramstr or '&', vk.token)
-  local response, response_str = '', ''
-
-  cURL.easy{
-    url = url,
-    httpheader = { "user-agent: npm/VK-Promise" },
-    writefunction = function(res) response_str = response_str .. res end
-  }:perform():close()
+  cURL.easy{ url = vk.apiUrl:format(method, paramstr or '&', vk.token), httpheader = { "user-agent: npm/VK-Promise" }, writefunction = function(res) response_str = response_str .. res end }:perform():close()
   response = json.decode(response_str, 1, nil)
 
   print("\n[REQUEST]\t( " .. method .. " " .. (paramstr or "") .. " ) \n[RESPONSE]\t" .. response_str .. "\n")
-  if response.error then
-    io.write("\n////////////////[ERROR]//////////////// \n[RESPONSE]\t" .. response_str .. "\n////////////////////////////////////////\n")
-    return response
-  end
-  if not notLog then io.write("\n[REQUEST]\t( " .. method .. " " .. (paramstr or "") .. " ) \n[RESPONSE]\t" .. response_str .. "\n") end
+  if response.error then return response end
 
   return response.response
 end
 
 function vk.longpollListen()
   if not (vk.longPollData.server and vk.longPollData.key and vk.longPollData.ts) then return "One of parameters are not provided."; end
-
   local response = ''
 
-  local url = vk.longPollUrl:format(vk.longPollData.server, vk.longPollData.key, vk.longPollData.ts)
-
-  cURL.easy{
-    url = url,
-    httpheader = { "user-agent: npm/VK-Promise" },
-    writefunction = function(res) response = response .. res end
-  }:perform():close()
+  cURL.easy{ url = vk.longPollUrl:format(vk.longPollData.server, vk.longPollData.key, vk.longPollData.ts), httpheader = { "user-agent: npm/VK-Promise" }, writefunction = function(res) response = response .. res end }:perform():close()
   response = json.decode(response, 1, nil)
-
   if response.failed or response.error then return vk.longpollStart() end
 
   vk.longPollData.ts = response.ts
 
   for key, value in pairs(response.updates) do
-    local msg = vk.parseLongPoll(value)
+    local msg, event = vk.parseLongPoll(value), value
 
     if msg ~= nil then if vk.callbacks['message'] then vk.callbacks['message'](msg) end end
   end
@@ -93,29 +72,16 @@ function vk.longpollGet()
   local res = vk.call("messages.getLongPollServer", nil, false)
   if res.error then return res end
 
-  vk.longPollData.server = res.server
-  vk.longPollData.key = res.key
-  vk.longPollData.ts = res.ts
+  vk.longPollData.server, vk.longPollData.key, vk.longPollData.ts = res.server, res.key, res.ts
 end
 
 local msg_mt = {
-  send = function(msg, txtbody)
-    vk.call("messages.send", { peer_id = msg.peer_id, message = txtbody })
-  end,
-  sendSticker = function(msg, stickerid)
-    vk.call("messages.send", { peer_id = msg.peer_id, sticker_id = stickerid })
-  end,
-  reply = function(msg, txtbody)
-    vk.call("messages.send", { peer_id = msg.peer_id, reply_to = msg.id, message = txtbody })
-  end,
-  forward = function(msg, peer_id, txtbody)
-    vk.call("messages.send", { peer_id = peer_id, forward_messages = msg.id, message = txtbody or "" })
-  end,
-  edit = function(msg, txtbody)
-    vk.call("messages.send", { peer_id = msg.peer_id, message_id = msg.id, message = txtbody })
-  end
+  send = function(msg, txtbody) vk.call("messages.send", { peer_id = msg.peer_id, message = txtbody }) end,
+  sendSticker = function(msg, stickerid) vk.call("messages.send", { peer_id = msg.peer_id, sticker_id = stickerid }) end,
+  reply = function(msg, txtbody) vk.call("messages.send", { peer_id = msg.peer_id, reply_to = msg.id, message = txtbody }) end,
+  forward = function(msg, peer_id, txtbody) vk.call("messages.send", { peer_id = peer_id, forward_messages = msg.id, message = txtbody or "" }) end,
+  edit = function(msg, txtbody) vk.call("messages.send", { peer_id = msg.peer_id, message_id = msg.id, message = txtbody }) end
 }
-
 msg_mt.__index = msg_mt
 
 function vk.parseLongPoll(data)
@@ -131,8 +97,7 @@ function vk.parseLongPoll(data)
   }, msg_mt)
 
   if (data[8] and data[8]['attach0']) then
-    msg.attachments = {};
-    i = 1;
+    msg.attachments, i = {}, 1;
 
     while (i <= 10) and (data[8]['attach' + i]) do
       table.insert(msg.attachments, data[8]['attach' + i + '_type'] .. data[8]['attach' + i])
