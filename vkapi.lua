@@ -53,11 +53,11 @@ end
 
 function vk.longpollListen()
   if not (vk.longPollData.server and vk.longPollData.key and vk.longPollData.ts) then return "One of parameters are not provided."; end
-  local response = ""
+  local response, response_str = "", ""
 
 	local url = vk.longPollUrl:format(vk.longPollData.server, vk.longPollData.key, vk.longPollData.ts)
 	response_str = curl_request(url, vk.userAgent)
-  response = json.decode(response, 1, nil)
+  response = json.decode(response_str, 1, nil)
   if response.failed or response.error then return vk.longpollStart() end
 
   vk.longPollData.ts = response.ts

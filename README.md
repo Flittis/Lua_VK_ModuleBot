@@ -1,7 +1,7 @@
 # Lua_VK_ModuleBot
 
 
-## **First, you must to install last versions of _[LUA](https://www.lua.org)_ and _[LuaRocks](https://luarocks.org/)_**
+## **First, you must to install last versions of _[LUAJIT](https://luajit.org)_ and _[LuaRocks](https://luarocks.org/)_**
 - **Install development tools:**
 ```
  -$ sudo apt install build-essential libreadline-dev
@@ -9,10 +9,9 @@
 
 - **Install _LUA_:**
 ```
--$ curl -R -O http://www.lua.org/ftp/lua-5.3.4.tar.gz
--$ tar -zxf lua-5.3.4.tar.gz
--$ cd lua-5.3.4
--$ make linux test
+-$ git clone https://luajit.org/git/luajit-2.0.git
+-$ git checkout v2.1
+-$ ./configure
 -$ sudo make install
 ```
 - **Install _LuaRocks_:**
@@ -28,13 +27,13 @@
 - **When installed, clone this repository**
 ```
 -$ git clone https://github.com/Flittis/Lua_VK_ModuleBot.git
+-$ git checkout jit-version
 ```
 
 - **Open folder, which you cloned, and install packages:**
 ```
 -$ luarocks install luautf8
 -$ luarocks install dkjson
--$ luarocks install Lua-cURL
 -$ luarocks install luafilesystem
 ```
 
