@@ -9,9 +9,7 @@ function isInArray(a, v) for i = 1, #a do if a[i] == v then return true end end 
 function includes(a, v)  for i = 1, #a do  if v:find(a[i]) then return true end end return false end
 
 function obj.func(msg)
-  if(includes(stickerTriggerWords, msg.body:lower()) == false) then return end
-
-  if((timeout[msg.peer_id] and os.time() > timeout[msg.peer_id]) and msg.out == false and (not stickerTriggerChats[1] or isInArray(stickerTriggerChats, msg.chat_id))) then
+  if(includes(stickerTriggerWords, msg.body:lower()) and (not timeout[msg.peer_id] or os.time() > timeout[msg.peer_id]) and msg.out == false and (not stickerTriggerChats[1] or isInArray(stickerTriggerChats, msg.chat_id))) then
     msg:sendSticker(stickerTriggerStickers[math.random(1, #stickerTriggerStickers)])
     timeout[msg.peer_id] = os.time() + (stickersTimeoutTime * 60)
   end
