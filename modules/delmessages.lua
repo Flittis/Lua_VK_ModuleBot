@@ -1,7 +1,11 @@
 local config = ...
-local deleteTrigger, deleteTriggerAll, deleteEditTo = config.deleteTrigger or 'ой', config.deleteTriggerAll or '/delall', config.deleteEditTo or 'ᅠ'
+local deleteTrigger = config.deleteTrigger or addToConfig('deleteTrigger', 'ой')
+local deleteTriggerAll = config.deleteTriggerAll or addToConfig('deleteTriggerAll', '/delall')
+local deleteEditTo = config.deleteEditTo or addToConfig('deleteEditTo', 'ᅠ')
 
 local obj = {}
+
+-- Main function
 
 function obj.func(msg)
   if(msg.out and (msg.body:lower():find('^' .. deleteTrigger ..'([%-0-9]*)$') or msg.body:lower():find('^' .. deleteTriggerAll ..'([%-0-9]*)$'))) then

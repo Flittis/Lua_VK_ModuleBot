@@ -1,5 +1,4 @@
 require 'curl.init'
-local json = require 'dkjson'
 local bit = require 'bit'
 
 local vk = {
@@ -46,7 +45,7 @@ function vk.call(method, parameters, notLog)
   response = json.decode(response_str, 1, nil)
 
   print('\n[REQUEST]\t( ' .. method .. ' ' .. (paramstr or '') .. ' ) \n[RESPONSE]\t' .. response_str .. '\n')
-  if response.error then return response end
+  if not response or response.error then return response end
 
   return response.response
 end
@@ -82,7 +81,7 @@ local msg_mt = {
   sendSticker = function(msg, stickerid) vk.call('messages.send', { peer_id = msg.peer_id, sticker_id = stickerid }) end,
   reply = function(msg, txtbody) vk.call('messages.send', { peer_id = msg.peer_id, reply_to = msg.id, message = txtbody }) end,
   forward = function(msg, peer_id, txtbody) vk.call('messages.send', { peer_id = peer_id, forward_messages = msg.id, message = txtbody or '' }) end,
-  edit = function(msg, txtbody) vk.call('messages.send', { peer_id = msg.peer_id, message_id = msg.id, message = txtbody }) end
+  edit = function(msg, txtbody) vk.call('messages.edit', { peer_id = msg.peer_id, message_id = msg.id, message = txtbody }) end
 }
 msg_mt.__index = msg_mt
 
@@ -95,6 +94,7 @@ function vk.parseLongPoll(data)
     title = data[6],
     body = data[7],
     peer_id = tonumber(data[4]),
+    user_id = tonumber(data[8].from or data[4]),
     data = data
   }, msg_mt)
 
