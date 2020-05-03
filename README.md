@@ -10,8 +10,8 @@
 - **Install _LUA_:**
 ```
 -$ git clone https://luajit.org/git/luajit-2.0.git
+-$ cd luajit-2.0
 -$ git checkout v2.1
--$ ./configure
 -$ sudo make install
 ```
 - **Install _LuaRocks_:**
@@ -21,12 +21,13 @@
 -$ cd luarocks-3.3.1
 -$ ./configure
 -$ make build
--$ make install
+-$ sudo make install
 ```
 
 - **When installed, clone this repository**
 ```
 -$ git clone https://github.com/Flittis/Lua_VK_ModuleBot.git
+-$ cd Lua_VK_ModuleBot
 -$ git checkout jit-version
 ```
 
