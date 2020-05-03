@@ -4,7 +4,8 @@ local bit = require 'bit'
 local vk = {
   token = nil,
 	userAgent = 'npm/VK-Promise',
-  apiUrl = 'https://api.vk.com/method/%s?%saccess_token=%s&v=5.69',
+  apiVers = '5.69',
+  apiUrl = 'https://api.vk.com/method/%s?%saccess_token=%s&v=%s',
   longPollUrl = 'https://%s?act=a_check&wait=25&mode=234&key=%s&ts=%s',
   longPollWork = false,
   longPollData = {
@@ -14,6 +15,8 @@ local vk = {
   },
   callbacks = {}
 }
+
+function toUri(str) return (type(str) == 'string' and str:_gsub('[%c*%p*%s*]', function(c) return ('%%%02X'):format(c:_byte()) end) or str) end
 
 function vk.init(token) if not token then return false end vk.token = token end
 function vk.longpollStop() vk.longPollWork = false end
@@ -39,15 +42,33 @@ end
 function vk.call(method, parameters, notLog)
   if not vk.token then return { error = 'Access token is not defined' } end
   local paramstr, response, response_str = '', '', ''
-  if parameters then for key, value in pairs(parameters) do paramstr = paramstr .. key .. '=' .. value .. '&' end end
-	local url = vk.apiUrl:format(method, paramstr or '&', vk.token)
+  if parameters then for key, value in pairs(parameters) do paramstr = paramstr .. key .. '=' .. toUri(value) .. '&' end end
+	local url = vk.apiUrl:format(method, paramstr and paramstr or '&', vk.token, parameters and (parameters.v or vk.apiVers) or vk.apiVers)
 	response_str = curl_request(url, vk.userAgent)
   response = json.decode(response_str, 1, nil)
 
   print('\n[REQUEST]\t( ' .. method .. ' ' .. (paramstr or '') .. ' ) \n[RESPONSE]\t' .. response_str .. '\n')
   if not response or response.error then return response end
 
-  return response.response
+  return response.response or response
+end
+
+function vk.upload(getUploadUrl, saveUrl, file, settings)
+  if not vk.token then return { error = 'Access token is not defined' } end
+
+  local uploadServer = vk.call( getUploadUrl, settings and settings.get )
+  if uploadServer.upload_url then
+    local uploadRequestStr = curl_post_request(uploadServer.upload_url, vk.userAgent, file)
+    print('\n[REQUEST]\t( ' .. uploadServer.upload_url .. ' ) \n[RESPONSE]\t' .. uploadRequestStr or nil .. '\n')
+
+    local uploadRequest = json.decode(uploadRequestStr)
+
+    if uploadRequest and uploadRequest.file then
+      local save = vk.call( saveUrl, { file = uploadRequest.file } )
+
+      return save
+    end
+  end
 end
 
 function vk.longpollListen()
@@ -78,6 +99,7 @@ end
 
 local msg_mt = {
   send = function(msg, txtbody) vk.call('messages.send', { peer_id = msg.peer_id, message = txtbody }) end,
+  delete = function(msg, forAll) vk.call('messages.delete', { delete_for_all = forAll and '1' or '0', message_ids = msg.id }) end,
   sendSticker = function(msg, stickerid) vk.call('messages.send', { peer_id = msg.peer_id, sticker_id = stickerid }) end,
   reply = function(msg, txtbody) vk.call('messages.send', { peer_id = msg.peer_id, reply_to = msg.id, message = txtbody }) end,
   forward = function(msg, peer_id, txtbody) vk.call('messages.send', { peer_id = peer_id, forward_messages = msg.id, message = txtbody or '' }) end,

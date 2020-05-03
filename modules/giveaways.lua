@@ -24,7 +24,6 @@ local phrases = {
 -- Additional functions
 
 function declOfNum(number, titles) return titles[ ((number % 100 > 4 and number % 100 < 20) and 2 or ({2, 0, 1, 1, 1, 2})[((number % 10 < 5) and number % 10 or 5) + 1]) + 1 ] end
-function toUri(str) return str:_gsub('.', function(c) return ('%%%02X'):format(c:_byte()) end) end
 function secToTime(time)
           local hours = math.floor(time/3600)
           local mins = math.floor(time/60 - (hours*60))
@@ -46,7 +45,7 @@ function findWinner(gvObj)
       msgTemplate = phrases.giveawayEnd:format(count, declOfNum(count, phrases.declensions.users), winnerId, gvObj.users[winnerId])
     end
 
-    vk.call('messages.send', { peer_id = gvObj.peer_id, message = toUri(msgTemplate) })
+    vk.call('messages.send', { peer_id = gvObj.peer_id, message = msgTemplate })
 end
 
 -- Main function
@@ -60,7 +59,7 @@ function obj.func(msg)
           local str = msg.body:match('^' .. giveawayStartWord .. (time and '%s+%d+%.*%d*' or '') .. '%s+(.+)') or giveawayDefWord
           local timeStr = secToTime(tonumber(time or giveawayDefTime) * 60)
 
-          msg:edit(toUri(phrases.giveawayStart:format(str, timeStr)))
+          msg:edit(phrases.giveawayStart:format(str, timeStr))
           giveaways[msg.peer_id] = { trigger = str, time = time, timeStr = timeStr, end_time = os.time() + (time * 60), peer_id = msg.peer_id, msg_id = msg.id, users = { } }
       elseif msg.body:lower():find('^' .. giveawayStop .. '$') then
           findWinner(giveaways[msg.peer_id])
@@ -72,9 +71,9 @@ function obj.func(msg)
       local gvObj, usersTemplate = giveaways[msg.peer_id], {}
       for k, v in pairs(gvObj.users) do table.insert(usersTemplate, '@id' .. k .. ' (' .. v .. ')') end
 
-      local msgTemplate = phrases.giveawayStart:format(gvObj.trigger, gvObj.timeStr) .. phrases.giveawayUsers:format(#usersTemplate, declOfNum(#usersTemplate, phrases.declensions.users), table.concat(usersTemplate, ' ,'))
+      local msgTemplate = phrases.giveawayStart:format(gvObj.trigger, gvObj.timeStr) .. phrases.giveawayUsers:format(#usersTemplate, declOfNum(#usersTemplate, phrases.declensions.users), table.concat(usersTemplate, ', '))
 
-      vk.call('messages.edit', { peer_id = msg.peer_id, message_id = gvObj.msg_id, message = toUri(msgTemplate) })
+      vk.call('messages.edit', { peer_id = msg.peer_id, message_id = gvObj.msg_id, message = msgTemplate })
   end
 end
 

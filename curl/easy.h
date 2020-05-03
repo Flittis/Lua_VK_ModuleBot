@@ -129,7 +129,8 @@ typedef enum {
 	CURLE_AUTH_ERROR,              /* 94 - an authentication function returned an
 																		error */
 	CURLE_HTTP3,                   /* 95 - An HTTP/3 layer problem */
-	CURL_LAST /* never use! */
+	CURL_LAST, /* never use! */
+	CURL_ZERO_TERMINATED
 } CURLcode;
 
 typedef enum {
@@ -363,9 +364,10 @@ typedef enum {
 	CURLOPT_UNIX_SOCKET_PATH = CURLOPTTYPE_OBJECTPOINT+231,
 	CURLOPT_IOCTLFUNCTION = CURLOPTTYPE_FUNCTIONPOINT+130,
 	CURLOPT_SERVICE_NAME = CURLOPTTYPE_OBJECTPOINT+236,
+	CURLOPT_MIMEPOST = CURLOPTTYPE_OBJECTPOINT+269
 } CURLoption;
 
-typedef void CURL;
+typedef void CURL, curl_mime, curl_mimepart;
 typedef size_t (*curl_write_callback)(char *,
                                       size_t,
                                       size_t,
@@ -386,3 +388,9 @@ CURLcode curl_easy_setopt(CURL *, CURLoption, ...);
 CURLcode curl_easy_perform(CURL *);
 void curl_easy_cleanup(CURL *);
 const char *curl_easy_strerror(CURLcode);
+
+curl_mime *curl_mime_init(CURL *);
+curl_mimepart *curl_mime_addpart(CURL *);
+CURLcode curl_mime_name(CURL *, const char *);
+CURLcode curl_mime_filedata(CURL *, const char *);
+void curl_mime_free(CURL *);

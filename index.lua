@@ -36,6 +36,14 @@ end
 
 -- Config Functions
 
+function toStringValue(v)
+	if type(v) == 'string' then return "'" .. v .. "'"
+	elseif type(v) == 'table' then
+		local str = ''
+		for i, val in pairs(v) do str = str .. toStringValue(val) .. ((i < #v) and ', ' or '') end
+		return '{' .. str .. '}'
+	else return tostring(v) end
+end
 function addToConfig(key, value) config[key] = value return value end
 function loadConfig()
   local chunk, err = loadfile('config.lua')
@@ -43,15 +51,6 @@ function loadConfig()
   else config.accessToken = '' end
 end
 function saveConfig()
-    local function toStringValue(v)
-    	if type(v) == 'string' then return "'" .. v .. "'"
-    	elseif type(v) == 'table' then
-        local str = ''
-        for i, val in pairs(v) do str = str .. (type(val) == 'string' and  "'" .. val .. "'" or val) .. ((i < #v) and ', ' or '') end
-        return '{' .. str .. '}'
-    	else return tostring(v) end
-    end
-
     local f = io.open('config.lua', 'w')
     f:write('return {\n')
     for k, v in pairs(config) do f:write('  ', k, ' = ', toStringValue(v), ',\n') end

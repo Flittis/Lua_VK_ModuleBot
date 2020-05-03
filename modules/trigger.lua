@@ -11,7 +11,6 @@ local obj, timeout = {}, {}
 math.randomseed(os.time())
 function isInArray(a, v) for i = 1, #a do if a[i] == v then return i end end return false end
 function includes(a, v)  for i = 1, #a do if v:find(a[i]) then return true end end return false end
-function toUri(str) return str:_gsub('.', function(c) return ('%%%02X'):format(c:_byte()) end) end
 
 -- Main function
 
@@ -21,7 +20,7 @@ function obj.func(msg)
     if check then table.remove(stickerTriggerChats, check) else table.insert(stickerTriggerChats, msg.chat_id) end
     addToConfig('stickerTriggerChats', stickerTriggerChats)
     saveConfig()
-    return msg:edit(toUri('Чат ' .. msg.chat_id .. ' был ' .. (check and 'удален' or 'добавлен') .. '.'))
+    return msg:edit('Чат ' .. msg.chat_id .. ' был ' .. (check and 'удален' or 'добавлен') .. '.')
   elseif(msg.body:lower():find('^' .. stickerAddSticker)) then
     local nums, toAdd, toDel = msg.body:match('^' .. stickerAddSticker .. '%s+(%A+)') or '', {}, {}
 
@@ -40,7 +39,7 @@ function obj.func(msg)
 
     addToConfig('stickerTriggerStickers', stickerTriggerStickers)
     saveConfig()
-    return #toAdd + #toDel > 0 and msg:edit(toUri('Стикеры ' .. (#toAdd > 0 and 'добавлены: ' .. table.concat(toAdd, ', ') .. '\n' or '') .. (#toDel > 0 and 'удалены: ' .. table.concat(toDel, ', ') or ''))) or false
+    return #toAdd + #toDel > 0 and msg:edit('Стикеры ' .. (#toAdd > 0 and 'добавлены: ' .. table.concat(toAdd, ', ') .. '\n' or '') .. (#toDel > 0 and 'удалены: ' .. table.concat(toDel, ', ') or '')) or false
   end
 
   if(includes(stickerTriggerWords, msg.body:lower()) and (not timeout[msg.peer_id] or os.time() > timeout[msg.peer_id]) and msg.out == false and (not stickerTriggerChats[1] or isInArray(stickerTriggerChats, msg.chat_id))) then
