@@ -53,9 +53,9 @@ function obj.func(msg)
     else
       local res = vk.upload('docs.getMessagesUploadServer', 'docs.save', './audios/' .. msg.body:lower():sub(2) .. '.ogg', {get = { type = 'audio_message', peer_id = msg.peer_id }})
 
-      if not res or res.error then return
+      if not res or not res[1] or res.error then return
       else
-        doc = 'doc' .. res[1].owner_id .. '_' .. res[1].id .. (res[1].access_key and '_' .. res[1].access_keyor '')
+        doc = 'doc' .. res[1].owner_id .. '_' .. res[1].id .. (res[1].access_key and '_' .. res[1].access_key or '')
         audio_cache[msg.body:lower():sub(2)] = doc
         saveAudioConfig()
       end
