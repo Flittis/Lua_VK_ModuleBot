@@ -12,7 +12,7 @@ function loadAudios()
   if handle then
   	for entry in handle:lines() do
   		if entry ~= '.' and entry ~= '..' then
-  			if entry:sub(-4) == '.ogg' then table.insert(audios, entry:sub(1, -5)) print(entry:sub(1, -5)) end
+  			if entry:sub(-4) == '.ogg' then table.insert(audios, entry:sub(1, -5)) end
   		end
   	end
   	handle:close()
