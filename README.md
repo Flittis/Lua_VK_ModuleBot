@@ -10,15 +10,17 @@
 
 - **Install development tools:**
 ```
- -$ sudo apt install build-essential libreadline-dev
+ -$ sudo apt install build-essential libreadline-dev libcurl4-openssl-dev
+ -$ sudo ln -s /usr/include/x86_64-linux-gnu/curl /usr/include/curl
 ```
 
-- **Install _LUA_:**
+- **Install _LUAJIT_:**
 ```
 -$ git clone https://luajit.org/git/luajit-2.0.git
 -$ cd luajit-2.0
 -$ git checkout v2.1
 -$ sudo make install
+-$ ln -sf luajit-2.1.0-beta3 /usr/local/bin/luajit
 ```
 - **Install _LuaRocks_:**
 ```
@@ -34,16 +36,23 @@
 ```
 -$ git clone https://github.com/Flittis/Lua_VK_ModuleBot.git
 -$ cd Lua_VK_ModuleBot
--$ git checkout jit-version
 ```
 
-- **Open folder, which you cloned, and install packages:**
+- **Install packages:**
 ```
 -$ luarocks install luautf8
 -$ luarocks install dkjson
 ```
 
-## Settings
+## Starting
+
+- **Start script to create config file**
+```
+-$ luajit index.lua    --> [ERROR] Access token in config is not defined
+```
+This will create _config.lua_ file
+
+## Get token
 
 - **Follow the link:**
 https://vk.cc/8E0H4r
