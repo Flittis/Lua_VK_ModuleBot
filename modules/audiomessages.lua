@@ -31,9 +31,13 @@ function loadAudioConfig()
 end
 
 function saveAudioConfig()
-  local file = io.open('./audios/audio_cache.txt', 'w')
-  if file then for k,v in pairs(audio_cache) do file:write(k .. ':' .. v .. '\n') end end
-  file:close()
+  local file = io.open('./audios/temp', 'w')
+  if file then
+    for k,v in pairs(audio_cache) do file:write(k .. ':' .. v .. '\n') end
+    file:close()
+
+    os.rename('./audios/temp', './audios/audio_cache.txt')
+  end
 end
 
 loadAudios()
@@ -65,6 +69,7 @@ function obj.func(msg)
   end
 
   if msg.out and msg.body:lower():find('^' .. audioAdd .. '%s+.+') then
+    msg:delete(true)
     local res, name = vk.call('messages.getById', { message_ids = msg.id }), msg.body:lower():match('^' .. audioAdd .. '%s+(.+)')
 
     if res.items[1] and res.items[1].fwd_messages and res.items[1].fwd_messages[1].attachments then
