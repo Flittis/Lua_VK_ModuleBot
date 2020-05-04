@@ -2,6 +2,12 @@
 
 
 ## **First, you must to install last versions of _[LUAJIT](https://luajit.org)_ and _[LuaRocks](https://luarocks.org/)_**
+
+- **If you have, delete old Lua5.3 and LuaRocks**
+```
+-$ rm -rf /var/cache/luarocks /usr/local/include/lua.hpp /usr/local/include/lua.h /usr/local/etc/luarocks /usr/local/bin/luarocks-admin /usr/local/bin/luarocks /usr/local/bin/lua /usr/local/lib/luarocks /usr/local/lib/lua/5.3 /usr/local/share/lua
+```
+
 - **Install development tools:**
 ```
  -$ sudo apt install build-essential libreadline-dev
