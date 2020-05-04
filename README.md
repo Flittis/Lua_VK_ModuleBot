@@ -1,10 +1,10 @@
 # Lua_VK_ModuleBot
 
 # **This version is deprecated**
-# **Please us new ModuleBot with LuaJit**
-# https://github.com/Flittis/Lua_VK_ModuleBot/tree/jit-version
-# https://github.com/Flittis/Lua_VK_ModuleBot/tree/jit-version
-# https://github.com/Flittis/Lua_VK_ModuleBot/tree/jit-version
+- **Please us new ModuleBot with LuaJit**
+- https://github.com/Flittis/Lua_VK_ModuleBot/tree/jit-version
+- https://github.com/Flittis/Lua_VK_ModuleBot/tree/jit-version
+- https://github.com/Flittis/Lua_VK_ModuleBot/tree/jit-version
 
 
 
