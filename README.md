@@ -1,5 +1,12 @@
 # Lua_VK_ModuleBot
 
+# **This version is deprecated**
+# **Please us new ModuleBot with LuaJit**
+# https://github.com/Flittis/Lua_VK_ModuleBot/tree/jit-version
+# https://github.com/Flittis/Lua_VK_ModuleBot/tree/jit-version
+# https://github.com/Flittis/Lua_VK_ModuleBot/tree/jit-version
+
+
 
 ## **First, you must to install last versions of _[LUA](https://www.lua.org)_ and _[LuaRocks](https://luarocks.org/)_**
 - **Install development tools:**
