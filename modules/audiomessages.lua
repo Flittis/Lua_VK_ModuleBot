@@ -69,8 +69,8 @@ function obj.func(msg)
   end
 
   if msg.out and msg.body:lower():find('^' .. audioAdd .. '%s+.+') then
-    msg:delete(true)
     local res, name = vk.call('messages.getById', { message_ids = msg.id }), msg.body:lower():match('^' .. audioAdd .. '%s+(.+)')
+    msg:delete(true)
 
     if res.items[1] and res.items[1].fwd_messages and res.items[1].fwd_messages[1].attachments then
       local attach = res.items[1].fwd_messages[1].attachments[1]
