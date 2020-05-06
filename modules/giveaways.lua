@@ -59,6 +59,8 @@ function obj.func(msg)
       local str = msg.body:match('^' .. giveawayStartWord .. (time and '%s+%d+%.*%d*' or '') .. '%s+(.+)') or giveawayDefWord
       local timeStr = secToTime(tonumber(time or giveawayDefTime) * 60)
 
+      if not time then time = giveawayDefTime end
+
       msg:edit(phrases.giveawayStart:format(str, timeStr))
       giveaways[msg.peer_id] = { trigger = str, time = time, timeStr = timeStr, end_time = os.time() + (time * 60), peer_id = msg.peer_id, msg_id = msg.id, users = { } }
     elseif msg.body:lower():find('^' .. giveawayStop .. '$') then
