@@ -27,7 +27,7 @@ function obj.func(msg)
 
     if isEdit == 'true' then
       local code = [[ var arr = [%s], i = 1; while(i < arr.length) { if(arr[i] != %s) API.messages.edit({ peer_id: %s, message_id: arr[i], message: '%s' }); i = i + 1; } ]]
-      code = code:format(idsToDel, msg.id, msg.peer_id, deleteEditTo):_gsub('.', function(c) return ('%%%02X'):format(c:_byte()) end)
+      code = code:format(idsToDel, msg.id, msg.peer_id, deleteEditTo);
 
       vk.call('execute', { code = code })
     end
