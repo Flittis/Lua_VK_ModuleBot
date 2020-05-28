@@ -48,7 +48,7 @@ loadAudioConfig()
 function obj.func(msg)
   local inArray, inObject = isInArray(audios, msg.body:lower():sub(2)), isInObject(audio_cache, msg.body:lower():sub(2))
 
-  if msg.out and (inArray or inObject) then
+  if msg.out and msg.body:find('^!.+') and (inArray or inObject) then
     msg:delete(true)
 
     local doc = ''
