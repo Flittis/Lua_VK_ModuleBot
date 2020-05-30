@@ -1,20 +1,30 @@
 # Lua_VK_ModuleBot
 
+## Описание
 
-## **First, you must to install last versions of _[LUAJIT](https://luajit.org)_ and _[LuaRocks](https://luarocks.org/)_**
+Это _модульный_ бот для VK на Lua. Он отличается легким добавлением своих скриптов, ботов, простым добавлением соответствующего файла в папке _**modules**_. 
 
-- **If you have, delete old Lua5.3 and LuaRocks**
+Настройка бота осуществляется через файл _**config.lua**_, который автоматически заполняет себя в зависимости от установленных модулей.
+
+
+
+
+## **Во-первых, вам нужно установить _[LUAJIT](https://luajit.org)_ и _[LuaRocks](https://luarocks.org/)_**
+
+- **Если у вас уже установлен Lua5.3 и LuaRocks – нужно удалить**
 ```
 -$ rm -rf /var/cache/luarocks /usr/local/include/lua.hpp /usr/local/include/lua.h /usr/local/etc/luarocks /usr/local/bin/luarocks-admin /usr/local/bin/luarocks /usr/local/bin/lua /usr/local/lib/luarocks /usr/local/lib/lua/5.3 /usr/local/share/lua
 ```
 
-- **Install development tools:**
+- **Устанавливаем инструменты для разработки:**
 ```
- -$ sudo apt install build-essential libreadline-dev libcurl4-openssl-dev
- -$ sudo ln -s /usr/include/x86_64-linux-gnu/curl /usr/include/curl
+-$ sudo apt update
+-$ sudo apt upgrade
+-$ sudo apt install build-essential libreadline-dev curl libcurl4 libcurl4-openssl-dev
+-$ sudo ln -s /usr/include/x86_64-linux-gnu/curl /usr/include/curl
 ```
 
-- **Install _LUAJIT_:**
+- **Устанавливаем _LUAJIT_:**
 ```
 -$ git clone https://luajit.org/git/luajit-2.0.git
 -$ cd luajit-2.0
@@ -22,7 +32,7 @@
 -$ sudo make install
 -$ ln -sf luajit-2.1.0-beta3 /usr/local/bin/luajit
 ```
-- **Install _LuaRocks_:**
+- **Устанавливаем _LuaRocks_:**
 ```
 -$ wget https://luarocks.org/releases/luarocks-3.3.1.tar.gz
 -$ tar zxpf luarocks-3.3.1.tar.gz
@@ -32,35 +42,103 @@
 -$ sudo make install
 ```
 
-- **When installed, clone this repository**
+- **После установки – клонируем репозиторий в корневую папку:**
 ```
+-$ cd /root
 -$ git clone https://github.com/Flittis/Lua_VK_ModuleBot.git
 -$ cd Lua_VK_ModuleBot
 ```
 
-- **Install packages:**
+- **Устанавливаем библиотеки:**
 ```
 -$ luarocks install luautf8
 -$ luarocks install dkjson
 ```
 
-## Starting
+## Первый запуск
 
-- **Start script to create config file**
+- **Запустите скрипт (при первом запуске будет создан файл конфига с значениями по умолчанию)**
 ```
 -$ luajit index.lua    --> [ERROR] Access token in config is not defined
 ```
-This will create _config.lua_ file
+После этого проверьте папку со скриптом на наличие _config.lua_.
 
-## Get token
+## Получаем токен
 
-- **Follow the link:**
+- **Перейдите по ссылке для получения токена с правами на сообщения:**
 https://vk.cc/8E0H4r
 
-- **Copy access token from adress line.**
+- **Скопируйте ваш токен из адрессной строки, как показано на скриншоте ниже (никому его не показывайте)**
 ![alt text](https://github.com/Flittis/Lua_VK_ModuleBot/raw/master/tokenScreen.jpg)
 
-- **And then put your token in quotes beside accessToken in _config.lua_**
+- **И потом вставьте ваш токен в файл _config.lua_**
 ```
-accessToken = " token here "
+accessToken = "сюда конфиг"
+```
+
+## Настройка бота
+
+Для настройки бота, откройте файл _**config.lua**_, в нем будет несколько строк, в зависимости от количества установленных модулей. 
+
+### Обозначения всех данных в конфиге:
+
+- **Токен**
+```
+accessToken = '<тут будет ваш токен>', -- это ваш токен, который вы указали в шаге выше
+```
+
+- **Удаление прошлых сообщений при написании ключевого слова (_delmessages.lua_)**
+
+Удаляет несколько ваших сообщений для **ВСЕХ ПОЛЬЗОВАТЕЛЕЙ** после отправки сообщения с указанным текстом
+
+```
+  deleteTrigger = 'ой',                  -- удаление предыдущих сообщений ("ой <количество>" если не указать количество - будет удалено только одно сообщение)
+  deleteTriggerAll = '/delall',          -- удаление сообщений в промежутке последних 150-и сообщений в чат
+  deleteEditTo = 'ᅠ',                     -- символ, на которое будет отредактировано сообщение, если указать минус после слова для удаления ("ой-", "ой-5"). Стандартно там установлен невидимый символ, то есть сообщение станет пустым перед удалением
+```
+
+- **Ответ стикером при написании ключевого слова в чатах (_trigger.lua_)**
+
+Отправляет стикер, если кто-то в указанном чате отправит сообщение с указанным текстом
+
+```
+  stickerAddChat = '!chat',              -- добавление/удаление чата, в который было отправлено сообщение, в которых будет работать триггер стикером
+  stickerAddSticker = '!sticker',        -- добавление/удаление стикеров, которые будут отправляться 
+  stickerTriggerWords = {'пинг', 'тест'},-- слова через запятую, на которых будет реагировать бот
+  stickerTriggerStickers = {1, 2, 3},    -- айди стикеров через запятую, которые будут отправляться
+  stickerTriggerChats = {1, 2, 3},       -- чаты в которых бот будет работать
+  stickerTriggerTime = 5,                -- таймаут между отправлениями стикеров
+```
+
+- **Розыгрышы (_giveaways.lua_)**
+
+Запуск розыгрыша, в котором для участия нужно будет написать ключевое слово
+
+После завршения, скрипт рандомно выберет победителя
+
+```
+  giveawayStartWord = '!розыгрыш',       -- текст сообщения, при котором будет начинатся розыгрыш ("!розыгрыш <время в минутах> <ключевое слово>" если не указывать время или ключевое слово – будут использовани стандартные значения)
+  giveawayStop = '!stop',                -- текст сообщения, при котором розыгрыш будет немедленно окончен
+  giveawayDefWord = 'Ку',                -- стандартное значения ключевого слова для розыгрыша
+  giveawayDefTime = 5,                   -- стандартное значения времени в минутах для розыгрыша
+  giveawayMinUsers = 1,                  -- минимальное количество участников в розыгрыше
+```
+
+- **Голосовые сообщения (_audiomessages.lua_)**
+
+Отправка голосовых сообщений после отправки имени файла ("!_<название голосового>_" - отправит голосовое, которое будет сохранено в папке _**/audios**_ под именем, которые вы указали)
+  
+"_**!гс pavel**_" - отправит голосовое _pavel.ogg_
+```
+  audioAdd = '!гс',                      -- текст сообщения, при котором пересланное голосовое сообщение будет сохранено в базу под указаным именем ("!гс тестирую" -> "!тестирую" отправит голосовое)
+```
+
+- **Генератор смеха (_laugh.lua_)**
+
+Просто генерирует смех из указанных символов, с указанной длиной
+
+```
+  laughTrigger = '!смех',                -- текст сообщения, при котором будет генерироваться смех
+  laughtLength = {5, 20},                -- минимальная и максимальная длина генерируемого смеха через запятую
+  laughLetters = {'А', 'Х', 'В'},        -- символы, из которых будет генерироваться смех
 ```
