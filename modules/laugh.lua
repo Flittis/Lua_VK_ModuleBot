@@ -8,7 +8,7 @@ math.randomseed(os.time())
 
 
 function obj.func(msg)
-  if msg.body:lower() == laughTrigger then
+  if msg.out and msg.body:lower() == laughTrigger then
     msg:delete(true)
 
     local laughLength, laughStr = math.random(laughLength[1], laughLength[2]), ''
