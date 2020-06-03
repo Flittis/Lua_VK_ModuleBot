@@ -11,6 +11,8 @@ function isInArray(a, v) for i = 1, #a do if a[i] == v then return i end end ret
 function includes(a, v)  for i = 1, #a do if v:find(a[i]) then return true end end return false end
 
 function findMessageById(chat, id)
+  if not logs[chat] then return end
+
   for i = 1, #logs[chat] do
     if logs[chat][i].message_id == id then return i end
   end
