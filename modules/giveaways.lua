@@ -17,7 +17,8 @@ local phrases = {
     minutes = {'минуту', 'минуты', 'минут'},
     seconds = {'секунду', 'секунды', 'секунд'},
     hours = {'час', 'часа', 'часов'},
-    users = {'участник', 'участника', 'участников'}
+    users = {'участник', 'участника', 'участников'},
+    usersWinners = {'участника', 'участников', 'участников'}
   }
 }
 
@@ -42,10 +43,10 @@ function findWinner(gvObj)
   elseif count < giveawayMinUsers then msgTemplate = phrases.giveawayTooFewUsers
   else
     local winnerId = ids[math.random(1, #ids)]
-    msgTemplate = phrases.giveawayEnd:format(count, declOfNum(count, phrases.declensions.users), winnerId, gvObj.users[winnerId])
+    msgTemplate = phrases.giveawayEnd:format(count, declOfNum(count, phrases.declensions.usersWinners), winnerId, gvObj.users[winnerId])
   end
 
-  vk.call('messages.send', { peer_id = gvObj.peer_id, message = msgTemplate })
+  vk.call('messages.send', { peer_id = gvObj.peer_id, message = msgTemplate, random_id = 0 })
 end
 
 -- Main function

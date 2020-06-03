@@ -4,7 +4,7 @@ local bit = require 'bit'
 local vk = {
   token = nil,
 	userAgent = 'npm/VK-Promise',
-  apiVers = '5.69',
+  apiVers = '5.107',
   apiUrl = 'https://api.vk.com/method/%s?%saccess_token=%s&v=%s',
   longPollUrl = 'https://%s?act=a_check&wait=25&mode=234&key=%s&ts=%s',
   longPollWork = false,
@@ -83,9 +83,20 @@ function vk.longpollListen()
   vk.longPollData.ts = response.ts
 
   for key, value in pairs(response.updates) do
-    local msg, event = vk.parseLongPoll(value), value
 
-    if msg ~= nil then if vk.callbacks['message'] then vk.callbacks['message'](msg) end end
+    if value[1] == 2 and bit.band(value[3], 131072) > 0 then
+      local delete, event = vk.parseLongPollDelete(value), value
+
+      if delete ~= nil then if vk.callbacks['delete'] then vk.callbacks['delete'](delete) end end
+    elseif value[1] == 4 then
+      local msg, event = vk.parseLongPollMessage(value), value
+
+      if msg ~= nil then if vk.callbacks['message'] then vk.callbacks['message'](msg) end end
+    elseif value[1] == 5 then
+      local edit, event = vk.parseLongPollEdit(value), value
+
+      if edit ~= nil then if vk.callbacks['edit'] then vk.callbacks['edit'](edit) end end
+    end
   end
 end
 
@@ -97,17 +108,46 @@ function vk.longpollGet()
   vk.longPollData.server, vk.longPollData.key, vk.longPollData.ts = res.server, res.key, res.ts
 end
 
+
+function vk.parseLongPollEdit(data)
+  if (data[1] ~= 5) then return nil end
+
+  local edit = {
+    id = data[2],
+    peer_id = tonumber(data[4]),
+    user_id = tonumber(data[8].from or data[4]),
+    body = data[7],
+    data = data
+  }
+
+  if (edit.peer_id > 2e9) then edit.chat_id = edit.peer_id - 2e9 end
+  return edit
+end
+
+function vk.parseLongPollDelete(data)
+  if data[1] ~= 2 and bit.band(data[3], 131072) <= 0 then return nil end
+
+  local delete = {
+    id = data[2],
+    peer_id = tonumber(data[4]),
+    data = data
+  }
+
+  if (delete.peer_id > 2e9) then delete.chat_id = delete.peer_id - 2e9 end
+  return delete
+end
+
 local msg_mt = {
-  send = function(msg, txtbody) vk.call('messages.send', { peer_id = msg.peer_id, message = txtbody }) end,
+  send = function(msg, txtbody, dont_parse_links, disable_mentions) vk.call('messages.send', { peer_id = msg.peer_id, message = txtbody, random_id = 0, dont_parse_links = dont_parse_links and '1' or '0', disable_mentions = disable_mentions and '1' or '0' }) end,
   delete = function(msg, forAll) vk.call('messages.delete', { delete_for_all = forAll and '1' or '0', message_ids = msg.id }) end,
-  sendSticker = function(msg, stickerid) vk.call('messages.send', { peer_id = msg.peer_id, sticker_id = stickerid }) end,
-  reply = function(msg, txtbody) vk.call('messages.send', { peer_id = msg.peer_id, reply_to = msg.id, message = txtbody }) end,
-  forward = function(msg, peer_id, txtbody) vk.call('messages.send', { peer_id = peer_id, forward_messages = msg.id, message = txtbody or '' }) end,
+  sendSticker = function(msg, stickerid) vk.call('messages.send', { peer_id = msg.peer_id, sticker_id = stickerid, random_id = 0 }) end,
+  reply = function(msg, txtbody) vk.call('messages.send', { peer_id = msg.peer_id, reply_to = msg.id, message = txtbody, random_id = 0 }) end,
+  forward = function(msg, peer_id, txtbody) vk.call('messages.send', { peer_id = peer_id, forward_messages = msg.id, message = txtbody or '', random_id = 0 }) end,
   edit = function(msg, txtbody) vk.call('messages.edit', { peer_id = msg.peer_id, message_id = msg.id, message = txtbody }) end
 }
 msg_mt.__index = msg_mt
 
-function vk.parseLongPoll(data)
+function vk.parseLongPollMessage(data)
   if (data[1] ~= 4) then return nil end
 
   local msg = setmetatable({
@@ -120,11 +160,32 @@ function vk.parseLongPoll(data)
     data = data
   }, msg_mt)
 
-  if (data[8] and data[8]['attach0']) then
+  if (data[8] and data[8]['attach1']) then
     msg.attachments, i = {}, 1;
 
-    while (i <= 10) and (data[8]['attach' + i]) do
-      table.insert(msg.attachments, data[8]['attach' + i + '_type'] .. data[8]['attach' + i])
+    while (i <= 10) and (data[8]['attach' .. i]) do
+      table.insert(msg.attachments, data[8]['attach' .. i .. '_type'] .. data[8]['attach' .. i])
+
+      if(data[8]['attachments']) then
+        local attach = json.decode(data[8]['attachments'], 1, nil)[i]
+
+        if data[8]['attach' .. i .. '_type'] == 'sticker' then
+            msg.sticker = {}
+
+            msg.sticker.id = attach['sticker']['sticker_id']
+            msg.sticker.img128 = attach['sticker']['images'][2]['url']
+            msg.sticker.img256 = attach['sticker']['images'][3]['url']
+            msg.sticker.img512 = attach['sticker']['images'][5]['url']
+        elseif data[8]['attach' .. i .. '_kind'] == 'audiomsg' then
+            msg.audiomsg = {}
+
+            msg.audiomsg.id = attach['audio_message']['id']
+            msg.audiomsg.owner_id = attach['audio_message']['owner_id']
+            msg.audiomsg.link_mp3 = attach['audio_message']['link_mp3']
+            msg.audiomsg.link_ogg = attach['audio_message']['link_ogg']
+        end
+      end
+
       i = i + 1
     end
   end

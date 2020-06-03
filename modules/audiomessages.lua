@@ -65,7 +65,7 @@ function obj.func(msg)
       end
     end
 
-    vk.call('messages.send', { peer_id = msg.peer_id, attachment = doc })
+    vk.call('messages.send', { peer_id = msg.peer_id, attachment = doc, random_id = 0 })
   end
 
   if msg.out and msg.body:lower():find('^' .. audioAdd .. '%s+.+') then
