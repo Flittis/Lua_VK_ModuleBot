@@ -27,7 +27,7 @@ function obj.func(msg)
     end
   end
 
-  if not msg.out and isInArray(logChats, msg.chat_id) and not msg.body:lower():find('^лог:') then
+  if not msg.out and isInArray(logChats, msg.chat_id) and not msg.body:lower():find('^лог%s*:') then
     print(json.encode(msg.data))
 
     local logObj = { message_id = msg.id, user_id = msg.user_id, is_deleted = false, is_edited = false, body = msg.body }
