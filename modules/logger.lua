@@ -28,29 +28,18 @@ function obj.func(msg)
   end
 
   if not msg.out and isInArray(logChats, msg.chat_id) and not msg.body:lower():find('^лог%s*:') then
-    print(json.encode(msg.data))
-
     local logObj = { message_id = msg.id, user_id = msg.user_id, is_deleted = false, is_edited = false, body = msg.body }
 
     if msg.sticker then logObj['attachments'] = msg.sticker.img512
     elseif msg.audiomsg then logObj['attachments'] = msg.audiomsg.link_ogg
     elseif msg.attachments then
-      local res = vk.call('messages.getById', { message_ids = msg.id })
-      local thisAttachments = {}
+      local thisAttach = {}
 
-      if res.items and res.items[1] and res.items[1].attachments then
-        local thisAttach = res.items[1].attachments
-
-        for i = 1, #thisAttach do
-          local type = thisAttach[i]['type']
-          local owner_id, id, access_key = thisAttach[i][type]['owner_id'], thisAttach[i][type]['id'], thisAttach[i][type]['access_key']
-
-          if type ~= 'photo' then thisAttachments[i] = 'https://vk.com/' .. type .. (owner_id and owner_id .. (id and '_' .. id .. (access_key and '_' .. access_key or '') or '') or '')
-          else thisAttachments[i] = thisAttach[i][type]['sizes'][#thisAttach[i][type]['sizes']].url end
-        end
-
-        logObj['attachments'] = table.concat(thisAttachments, ', ')
+      for i = 1, #msg.attachments do
+          table.insert(thisAttach, 'https://vk.com/' .. msg.attachments[i])
       end
+
+      logObj['attachments'] = table.concat(thisAttach, ', ')
     end
 
     if not logs[msg.chat_id] then logs[msg.chat_id] = {} end
