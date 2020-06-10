@@ -38,7 +38,7 @@ function obj.func(msg)
       local res = vk.call('messages.getById', { message_ids = msg.id })
       local thisAttachments = {}
 
-      if res.items[1] and res.items[1].attachments then
+      if res.items and res.items[1] and res.items[1].attachments then
         local thisAttach = res.items[1].attachments
 
         for i = 1, #thisAttach do
