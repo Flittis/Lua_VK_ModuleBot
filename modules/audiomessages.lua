@@ -51,16 +51,28 @@ function obj.func(msg)
   if msg.out and msg.body:find('^!.+') and (inArray or inObject) then
     msg:delete(true)
 
-    local doc = ''
+    local doc, filename = '', msg.body:lower():sub(2)
 
-    if inObject then doc = audio_cache[msg.body:lower():sub(2)]
+    if inObject then doc = audio_cache[filename]
     else
-      local res = vk.upload('docs.getMessagesUploadServer', 'docs.save', './audios/' .. msg.body:lower():sub(2) .. '.ogg', {get = { type = 'audio_message', peer_id = msg.peer_id }})
+      local res = vk.upload(
+      'docs.getMessagesUploadServer',
+      'docs.save',
+      './audios/' .. filename .. '.ogg',
+        {
+          get = {
+            type = 'audio_message',
+            peer_id = msg.peer_id
+          }
+        }
+      )
 
-      if not res or not res[1] or res.error then return
+      print('\n' .. json.encode(res) .. '\n')
+
+      if not res or res.error then return
       else
-        doc = 'doc' .. res[1].owner_id .. '_' .. res[1].id .. (res[1].access_key and '_' .. res[1].access_key or '')
-        audio_cache[msg.body:lower():sub(2)] = doc
+        doc = 'doc' .. res.audio_message.owner_id .. '_' .. res.audio_message.id
+        audio_cache[filename] = doc
         saveAudioConfig()
       end
     end
