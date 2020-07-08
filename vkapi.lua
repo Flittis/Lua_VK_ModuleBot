@@ -54,6 +54,10 @@ function vk.call(method, parameters, notLog)
 end
 
 function vk.upload(getUploadUrl, saveUrl, file, settings)
+  if not getUploadUrl then return 'Upload url is not defined' end
+  if not saveUrl then return 'Save url is not defined' end
+  if not file then return 'File is not defined' end
+
   if not vk.token then return { error = 'Access token is not defined' } end
 
   local uploadServer = vk.call( getUploadUrl, settings and settings.get )
@@ -69,6 +73,16 @@ function vk.upload(getUploadUrl, saveUrl, file, settings)
       return save
     end
   end
+end
+
+function vk.download(downloadUrl, filepath)
+  if not downloadUrl then return 'Error: Url is not defined' end
+  if not filepath then return 'Error: Filepath is not defined' end
+
+  local res = io.popen('curl "' .. downloadUrl .. '" -o "' .. filepath .. '"', 'r')
+  res:close()
+
+  return output
 end
 
 function vk.longpollListen()

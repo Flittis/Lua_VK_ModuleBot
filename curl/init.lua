@@ -11,6 +11,7 @@ local writefunc = ffi.cast('curl_write_callback', function(buf, size, num, ud)
 	local realsize = size * num
 	local struct = ffi.cast('struct mycurlbuffer *', ud)
 	local bufsize = realsize + 1
+
 	if struct.buf == 0 then
 		struct.buf = C.malloc(bufsize)
 	else
@@ -18,6 +19,7 @@ local writefunc = ffi.cast('curl_write_callback', function(buf, size, num, ud)
 		struct.buf = C.realloc(struct.buf, bufsize)
 		struct.buf[struct.size] = 0
 	end
+
 	ffi.copy(struct.buf + struct.size, buf, realsize)
 	struct.size = struct.size + realsize
 	return realsize
@@ -53,7 +55,6 @@ function curl_request(url, ua)
 	else return nil, ffi.string(lib.curl_easy_strerror(res)) end
 end
 
-
 function curl_post_request(url, ua, uploadfile)
 	local data = allocbuffer()
 	local h = lib.curl_easy_init()
@@ -67,7 +68,7 @@ function curl_post_request(url, ua, uploadfile)
 	if res == lib.CURLE_OK then res = lib.curl_easy_setopt(h, lib.CURLOPT_WRITEFUNCTION, writefunc)
 		if res == lib.CURLE_OK then res = lib.curl_easy_setopt(h, lib.CURLOPT_WRITEDATA, data)
 			if res == lib.CURLE_OK then res = lib.curl_easy_setopt(h, lib.CURLOPT_MIMEPOST, form)
-					if res == lib.CURLE_OK then res = lib.curl_easy_perform(h) end
+				if res == lib.CURLE_OK then res = lib.curl_easy_perform(h) end
 			end
 		end
 	end

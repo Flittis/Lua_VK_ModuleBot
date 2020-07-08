@@ -1,6 +1,7 @@
 local config = ...
 local obj, audios, audio_cache = {}, {}, {}
 local audioAdd = config.audioAdd or addToConfig('audioAdd', '!голосовое')
+local audioReload = config.audioReload or addToConfig('audioReload', '!апдейтгс')
 
 function isInArray(a, v) for i = 1, #a do if a[i] == v then return i end end return false end
 function isInObject(t, v) for k, _ in pairs(t) do if k == v then return true end end return false end
@@ -8,6 +9,8 @@ function isInObject(t, v) for k, _ in pairs(t) do if k == v then return true end
 -- Loading Audios
 
 function loadAudios()
+  audios = {}
+
   local handle = io.popen('ls audios', 'r')
   if handle then
   	for entry in handle:lines() do
@@ -48,6 +51,11 @@ loadAudioConfig()
 function obj.func(msg)
   local inArray, inObject = isInArray(audios, msg.body:lower():sub(2)), isInObject(audio_cache, msg.body:lower():sub(2))
 
+  if msg.out and msg.body == audioReload then
+    loadAudios()
+    msg:edit('База голосовых сообщений успешно обновлена')
+  end
+
   if msg.out and msg.body:find('^!.+') and (inArray or inObject) then
     msg:delete(true)
 
@@ -81,15 +89,15 @@ function obj.func(msg)
   end
 
   if msg.out and msg.body:lower():find('^' .. audioAdd .. '%s+.+') then
-    local res, name = vk.call('messages.getById', { message_ids = msg.id }), msg.body:lower():match('^' .. audioAdd .. '%s+(.+)')
-    msg:delete(true)
+    local res, name, attach = vk.call('messages.getById', { message_ids = msg.id }), msg.body:lower():match('^' .. audioAdd .. '%s+(.+)'), nil
+    if res.error then return end
 
-    if res.items[1] and res.items[1].fwd_messages and res.items[1].fwd_messages[1].attachments then
-      local attach = res.items[1].fwd_messages[1].attachments[1]
+    if res.items and res.items[1] and (res.items[1].reply_message or res.items[1].fwd_messages) then
+      local i, attach = res.items[1].reply_message or res.items[1].fwd_messages, nil
+      if i and i.attachments and i.attachments[1] and i.attachments[1].type == 'audio_message' then
+        local res2 = vk.download(i.attachments[1].audio_message.link_ogg, './audios/' .. name .. '.ogg')
 
-      if attach and attach.type == 'doc' and attach.doc.preview and attach.doc.preview.audio_msg then
-        audio_cache[name] = 'doc' .. attach.doc.owner_id .. '_' .. attach.doc.id .. '_' .. attach.doc.access_key
-        saveAudioConfig()
+        loadAudios()
       end
     end
   end

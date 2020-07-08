@@ -25,12 +25,17 @@ function obj.func(msg)
     local nums, toAdd, toDel = msg.body:match('^' .. stickerAddSticker .. '%s+(%A+)') or '', {}, {}
 
     if not nums or nums == '' then
-        local res = vk.call('messages.getById', { message_ids = msg.id })
-        if res.items[1] and res.items[1].fwd_messages then
+      local res = vk.call('messages.getById', { message_ids = msg.id })
+
+      if res.items and res.items[1] then
+        if res.items[1].reply_message then
+          if res.items[1].reply_message.attachments[1].type == 'sticker' then nums = nums .. ' ' .. res.items[1].reply_message.attachments[1].sticker.sticker_id end
+        elseif res.items[1].fwd_messages then
           for k, v in pairs(res.items[1].fwd_messages) do
-            if v.attachments[1].type == 'sticker' then nums = nums .. ' ' .. v.attachments[1].sticker.id end
+            if v.attachments[1].type == 'sticker' then nums = nums .. ' ' .. v.attachments[1].sticker.sticker_id end
           end
         end
+      end
     end
     nums:gsub("%d+", function(c) local check = isInArray(stickerTriggerStickers, tonumber(c)) table.insert(check and toDel or toAdd, c) end)
 
