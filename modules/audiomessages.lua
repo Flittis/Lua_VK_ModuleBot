@@ -97,6 +97,8 @@ function obj.func(msg)
       if i and i.attachments and i.attachments[1] and i.attachments[1].type == 'audio_message' then
         local res2 = vk.download(i.attachments[1].audio_message.link_ogg, './audios/' .. name .. '.ogg')
 
+        msg:delete(true)
+
         loadAudios()
       end
     end
