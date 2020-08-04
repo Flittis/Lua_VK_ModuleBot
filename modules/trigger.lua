@@ -2,7 +2,7 @@ local config = ...
 
 if not config.stickerReply then addToConfig('stickerReply', nil, {}) end
 
-local stickerTriggerWords = config.stickerReply.triggers or addToConfig('stickerReply', 'words', {'ping', 'пинг'})
+local stickerTriggerWords = config.stickerReply.words or addToConfig('stickerReply', 'words', {'ping', 'пинг'})
 local stickerTriggerChats = config.stickerReply.chats or addToConfig('stickerReply', 'chats', {1, 2, 3})
 local stickerTriggerStickers = config.stickerReply.stickers or addToConfig('stickerReply', 'stickers', {1, 2, 3})
 local stickerTimeoutTime = config.stickerReply.timeout or addToConfig('stickerReply', 'timeout', 5)
