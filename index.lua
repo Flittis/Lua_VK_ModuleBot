@@ -1,21 +1,32 @@
+-- loading libraries
 vk = require 'vkapi'
 json = require 'dkjson'
 local utf8 = require 'lua-utf8'
 
-local config = {}
-local modules = { message = {}, delete = {}, edit = {} }                            -- module table
+local config = {}	-- config table
+local modules = { message = {}, delete = {}, edit = {} }  -- modules table
 
--- Modules Functions
+--[[////////////////////////
+			Modules Functions
+	////////////////////////]]
 
+-- function to parse module
 function loadModule(name)
 	print(('[LOG]\tLoading module %q'):format(name))
-	local chunk, err = loadfile('modules/' .. name)                                   -- loading module file
-	if chunk then                                                                     -- if file loaded - continue
-		local succ, ret = pcall(chunk, config)                                          -- checking file for errors
-		if succ then                                                                    -- if no errors - continue
+
+	-- loading module file
+	local chunk, err = loadfile('modules/' .. name)
+
+	-- if file loaded - continue
+	if chunk then
+		local succ, ret = pcall(chunk, config)
+
+		-- if no errors - continue
+		if succ then
 			if not ret.func and not ret.delete and not ret.edit then return print(('[ERROR]\tModule %q has wrong structure'):format(name)) end
 
-			if type(ret.func) == 'function' then table.insert(modules.message, ret.func) end     -- if module has right structure insert module function in table
+			-- if modules has right structure insert module function in table
+			if type(ret.func) == 'function' then table.insert(modules.message, ret.func) end
 			if type(ret.delete) == 'function' then table.insert(modules.delete, ret.delete) end
 			if type(ret.edit) == 'function' then table.insert(modules.edit, ret.edit) end
 
@@ -23,36 +34,76 @@ function loadModule(name)
 		else print(('[ERROR]\tRuntime error in module %q: %s'):format(name, ret)) end
 	else print(('[ERROR]\tError loading module %q: %s'):format(name, err)) end
 end
+
+-- function to load modules
 function loadModules()
-  local handle = io.popen('ls modules', 'r')                                          -- open modules directory
+	print(('[LOG]\tLoading modules...'))
+
+	-- opening modules directory
+  local handle = io.popen('ls modules', 'r')
+
+	-- if directory exists
   if handle then
-  	for entry in handle:lines() do                                                     -- for every file in 'modules' folder
-  		if entry ~= '.' and entry ~= '..' then                                          -- skip system files
-  			if entry:sub(-4) == '.lua' then                                               -- if file ends with .lua – loading
-  				loadModule(entry)
+
+		-- try load every file from 'modules' folder
+  	for entry in handle:lines() do
+
+			-- skip system files
+  		if entry ~= '.' and entry ~= '..' then
+
+				-- if file has extension `.lua` – try to load
+  			if entry:sub(-4) == '.lua' then loadModule(entry)
   			else print(('[ERROR]\tFile %q is not .lua file'):format(entry)) end
   		end
   	end
+
+		-- closing directory
   	handle:close()
   else print('[ERROR]\tFailed to open modules directory') end
 end
 
--- Config Functions
+--[[////////////////////////
+			Config Functions
+	////////////////////////]]
 
+
+-- function to parse value to string
 function toStringValue(v)
 	if type(v) == 'string' then return "'" .. v .. "'"
 	elseif type(v) == 'table' then
-		local str = ''
-		for i, val in pairs(v) do str = str .. toStringValue(val) .. ((i < #v) and ', ' or '') end
-		return '{' .. str .. '}'
+		local str, ttype = '', 'array'
+		for key, val in pairs(v) do
+			if type(key) == 'number' then str = str .. toStringValue(val) .. ((key < #v) and ', ' or '')
+			elseif type(key) == 'string' then
+				str = str .. '		' .. key .. ' = ' .. toStringValue(val) .. ',\n'
+				ttype = 'obj'
+			end
+		end
+		return '{' .. (ttype == 'obj' and '\n' or '') .. str .. (ttype == 'obj' and '	' or '') ..  '}'
 	else return tostring(v) end
 end
-function addToConfig(key, value) config[key] = value return value end
+
+-- function for appending value to config
+function addToConfig(key, key2, value)
+	if key2 then config[key][key2] = value
+	elseif not key2 then config[key] = value end
+
+	return value
+end
+
+-- function to load config
 function loadConfig()
   local chunk, err = loadfile('config.lua')
-  if chunk then local succ, ret = pcall(chunk) if succ then config = ret end
-  else config.accessToken = '' end
+
+	if err then print(err) end
+
+  if chunk then
+		local succ, ret = pcall(chunk)
+		if succ then config = ret end
+	else config.accessToken = '' end
 end
+
+-- function to save config
 function saveConfig()
     local f = io.open('config.lua', 'w')
     f:write('return {\n')
@@ -61,30 +112,36 @@ function saveConfig()
     f:close()
 end
 
+
+-- loading config, modules and then saving config
 loadConfig()
 loadModules()
 saveConfig()
 
-if not config.accessToken or config.accessToken == '' then                              -- if access token in config file is not exist
-  print('[ERROR]\tAccess token in config is not defined')
-  return os.exit()                                          -- exit script
+-- if access token in config file is not exist – send error and crash script
+if not config.accessToken or config.accessToken == '' then
+  print('[ERROR]\tPlease fill `config.lua` file in script directory')
+  return os.exit()
 end
 
--- Main Functions
+--[[////////////////////////
+			Main Functions
+	////////////////////////]]
 
-vk.init(config.accessToken)                                 -- init vkapi library
+-- init vk-api library
+vk.init(config.accessToken)
 
-vk:on('message', function(msg)                                        -- creating callback function
-  for i = 1, #modules.message do modules.message[i](msg) end          -- call every module from table
-end)
+-- callback function for new messages
+vk:on('message', function(msg) for i = 1, #modules.message do modules.message[i](msg) end end)
 
-vk:on('delete', function(delete)
-	for i = 1, #modules.delete do modules.delete[i](delete) end
-end)
+-- callback function for deleting messages
+vk:on('delete', function(delete) for i = 1, #modules.delete do modules.delete[i](delete) end end)
 
-vk:on('edit', function(edit)
-	for i = 1, #modules.edit do modules.edit[i](edit) end
-end)
+-- callback function for editing messages
+vk:on('edit', function(edit) for i = 1, #modules.edit do modules.edit[i](edit) end end)
 
-for name, func in pairs(utf8)do if string[name]then string['_' .. name] = string[name];  string[name] = func end end    -- converting string function to utf-8
-vk.longpollStart()                                                                                                      -- starting longpoll
+-- converting string function to utf-8
+for name, func in pairs(utf8) do if string[name] then string['_' .. name] = string[name];  string[name] = func end end
+
+-- starting longpoll
+vk.longpollStart()

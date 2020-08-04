@@ -1,7 +1,10 @@
 local config = ...
+
+if not config.audio then addToConfig('audio', nil, {}) end
+
 local obj, audios, audio_cache = {}, {}, {}
-local audioAdd = config.audioAdd or addToConfig('audioAdd', '!голосовое')
-local audioReload = config.audioReload or addToConfig('audioReload', '!апдейтгс')
+local audioAdd = config.audio.add or addToConfig('audio', 'add', '!гсд')
+local audioReload = config.audio.update or addToConfig('audio', 'update', '!гсапдейт')
 
 function isInArray(a, v) for i = 1, #a do if a[i] == v then return i end end return false end
 function isInObject(t, v) for k, _ in pairs(t) do if k == v then return true end end return false end

@@ -1,10 +1,13 @@
 local config = ...
-local stickerTriggerWords = config.stickerTriggerWords or addToConfig('stickerTriggerWords', {'ping', 'пинг'})
-local stickerTriggerChats = config.stickerTriggerChats or addToConfig('stickerTriggerChats', {1, 2, 3})
-local stickerTriggerStickers = config.stickerTriggerStickers or addToConfig('stickerTriggerStickers', {1, 2, 3})
-local stickerTimeoutTime = config.stickerTriggerTime or addToConfig('stickerTimeoutTime', 5)
-local stickerAddChat = config.stickerAddChat or addToConfig('stickerAddChat', '!chat')
-local stickerAddSticker = config.stickerAddSticker or addToConfig('stickerAddSticker', '!sticker')
+
+if not config.stickerReply then addToConfig('stickerReply', nil, {}) end
+
+local stickerTriggerWords = config.stickerReply.triggers or addToConfig('stickerReply', 'words', {'ping', 'пинг'})
+local stickerTriggerChats = config.stickerReply.chats or addToConfig('stickerReply', 'chats', {1, 2, 3})
+local stickerTriggerStickers = config.stickerReply.stickers or addToConfig('stickerReply', 'stickers', {1, 2, 3})
+local stickerTimeoutTime = config.stickerReply.timeout or addToConfig('stickerReply', 'timeout', 5)
+local stickerAddChat = config.stickerReply.addChatTrigger or addToConfig('stickerReply', 'addChatTrigger', '!chat')
+local stickerAddSticker = config.stickerReply.addStickerTrigger or addToConfig('stickerReply', 'addStickerTrigger', '!sticker')
 
 local obj, timeout = {}, {}
 
@@ -18,8 +21,10 @@ function obj.func(msg)
   if(msg.body:lower() == stickerAddChat) then
     local check = isInArray(stickerTriggerChats, msg.chat_id)
     if check then table.remove(stickerTriggerChats, check) else table.insert(stickerTriggerChats, msg.chat_id) end
-    addToConfig('stickerTriggerChats', stickerTriggerChats)
+
+    addToConfig('stickerReply', 'chats', stickerTriggerChats)
     saveConfig()
+
     return msg:edit('Чат ' .. msg.chat_id .. ' был ' .. (check and 'удален' or 'добавлен') .. '.')
   elseif(msg.body:lower():find('^' .. stickerAddSticker)) then
     local nums, toAdd, toDel = msg.body:match('^' .. stickerAddSticker .. '%s+(%A+)') or '', {}, {}
@@ -42,8 +47,9 @@ function obj.func(msg)
     if #toAdd > 0 then for i,v in pairs(toAdd) do table.insert(stickerTriggerStickers, tonumber(v)) end end
     if #toDel > 0 then for i,v in pairs(toDel) do table.remove(stickerTriggerStickers, isInArray(stickerTriggerStickers, tonumber(v))) end end
 
-    addToConfig('stickerTriggerStickers', stickerTriggerStickers)
+    addToConfig('stickerReply', 'stickers', stickerTriggerStickers)
     saveConfig()
+
     return #toAdd + #toDel > 0 and msg:edit('Стикеры ' .. (#toAdd > 0 and 'добавлены: ' .. table.concat(toAdd, ', ') .. '\n' or '') .. (#toDel > 0 and 'удалены: ' .. table.concat(toDel, ', ') or '')) or false
   end
 

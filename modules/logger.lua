@@ -1,11 +1,13 @@
 local config = ...
-local logTrigger = config.logTrigger or addToConfig('logTrigger', '!лог')
-local logAddChat = config.logAddChat or addToConfig('logAddChat', '!логчат')
-local logMaxRecords = config.logMaxRecords or addToConfig('logMaxRecords', 15)
-local logChats = config.logChats or addToConfig('logChats', {})
+
+if not config.log then addToConfig('log', nil, {}) end
+
+local logTrigger = config.log.trigger or addToConfig('log', 'trigger', '!лог')
+local logAddChat = config.log.addChatTrigger or addToConfig('log', 'addChatTrigger', '!логчат')
+local logMaxRecords = config.log.maxRecords or addToConfig('log', 'maxRecords', 15)
+local logChats = config.log.chats or addToConfig('log', 'chats', {})
 
 local obj, logs = {}, {}
-local
 
 function isInArray(a, v) for i = 1, #a do if a[i] == v then return i end end return false end
 function includes(a, v)  for i = 1, #a do if v:find(a[i]) then return true end end return false end
@@ -53,7 +55,7 @@ function obj.func(msg)
     if check then table.remove(logChats, check)
     else table.insert(logChats, msg.chat_id) end
 
-    addToConfig('logChats', logChats)
+    addToConfig('log', 'chats', logChats)
     saveConfig()
 
     return msg:edit('Чат ' .. msg.chat_id .. ' был ' .. (check and 'удален' or 'добавлен') .. '.')
@@ -112,6 +114,3 @@ function obj.edit(edit)
 end
 
 return obj
-
-    -- if msg.sticker then print(msg.sticker.img512) end
-    -- if msg.audiomsg then print(msg.audiomsg.link_ogg) end

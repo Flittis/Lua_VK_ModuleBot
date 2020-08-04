@@ -1,7 +1,10 @@
 local config = ...
-local deleteTrigger = config.deleteTrigger or addToConfig('deleteTrigger', 'ой')
-local deleteTriggerAll = config.deleteTriggerAll or addToConfig('deleteTriggerAll', '/delall')
-local deleteEditTo = config.deleteEditTo or addToConfig('deleteEditTo', 'ᅠ')
+
+if not config.delete then addToConfig('delete', nil, {}) end
+
+local deleteTrigger = config.delete.trigger or addToConfig('delete', 'trigger', 'ой')
+local deleteTriggerAll = config.delete.triggerAll or addToConfig('delete', 'triggerAll', '/delall')
+local deleteEditTo = config.delete.editTo or addToConfig('delete', 'editTo', 'ᅠ')
 
 local obj = {}
 

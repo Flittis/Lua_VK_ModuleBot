@@ -1,9 +1,12 @@
 local config = ...
-local giveawayDefWord = string.lower(config.giveawayDefWord or addToConfig('giveawayDefWord', 'Ку'))
-local giveawayStartWord = string.lower(config.giveawayStartWord or addToConfig('giveawayStartWord', '!розыгрыш'))
-local giveawayStop = string.lower(config.giveawayStop or addToConfig('giveawayStop', '!stop'))
-local giveawayDefTime = config.giveawayDefTime or addToConfig('giveawayDefTime', 5)
-local giveawayMinUsers = config.giveawayMinUsers or addToConfig('giveawayMinUsers', 2)
+
+if not config.giveaway then addToConfig('giveaway', nil, {}) end
+
+local giveawayDefWord = string.lower(config.giveaway.defaultWord or addToConfig('giveaway', 'defaultWord', 'Ку'))
+local giveawayStartWord = string.lower(config.giveaway.trigger or addToConfig('giveaway', 'trigger', '!розыгрыш'))
+local giveawayStop = string.lower(config.giveaway.stopTrigger or addToConfig('giveaway', 'stopTrigger', '!stop'))
+local giveawayDefTime = config.giveaway.defaultTime or addToConfig('giveaway', 'defaultTime', 5)
+local giveawayMinUsers = config.giveaway.minPlayers or addToConfig('giveaway', 'minPlayers', 2)
 
 math.randomseed(os.time())
 local obj, giveaways = {}, {}

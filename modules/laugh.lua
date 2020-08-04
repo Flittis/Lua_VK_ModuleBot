@@ -1,11 +1,13 @@
 local config = ...
-local laughTrigger = config.laughTrigger or addToConfig('laughTrigger', '!смех')
-local laughLength = config.laughtLength or addToConfig('laughtLength', {4, 12})
-local laughLetters = config.laughLetters or addToConfig('laughLetters', {'А', 'Х', 'Ф', 'Ы', 'П', 'В', 'С'})
+
+if not config.laugh then addToConfig('laugh', nil, {}) end
+
+local laughTrigger = config.laugh.trigger or addToConfig('laugh', 'trigger', '!смех')
+local laughLength = config.laugh.length or addToConfig('laugh', 'length', {4, 12})
+local laughLetters = config.laugh.letters or addToConfig('laugh', 'letters', {'А', 'Х', 'Ф', 'Ы', 'П', 'В', 'С'})
 
 local obj = {}
 math.randomseed(os.time())
-
 
 function obj.func(msg)
   if msg.out and msg.body:lower() == laughTrigger then

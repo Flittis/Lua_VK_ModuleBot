@@ -157,7 +157,7 @@ local msg_mt = {
   sendSticker = function(msg, stickerid) vk.call('messages.send', { peer_id = msg.peer_id, sticker_id = stickerid, random_id = 0 }) end,
   reply = function(msg, txtbody) vk.call('messages.send', { peer_id = msg.peer_id, reply_to = msg.id, message = txtbody, random_id = 0 }) end,
   forward = function(msg, peer_id, txtbody) vk.call('messages.send', { peer_id = peer_id, forward_messages = msg.id, message = txtbody or '', random_id = 0 }) end,
-  edit = function(msg, txtbody) vk.call('messages.edit', { peer_id = msg.peer_id, message_id = msg.id, message = txtbody }) end
+  edit = function(msg, txtbody, forward, parselinks) vk.call('messages.edit', { peer_id = msg.peer_id, message_id = msg.id, message = txtbody, keep_forward_messages = forward or 1, dont_parse_links = parselinks or 1 }) end
 }
 msg_mt.__index = msg_mt
 
