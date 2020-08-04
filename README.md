@@ -61,7 +61,7 @@ _Работоспособность  бота_ проверена на **Debian/
  - **Запустите скрипт (при первом запуске будет создан файл конфига с значениями по умолчанию)**
 ```
 ~# luajit index.lua   
-[ERROR] Access token in config is not defined
+   [ERROR] Please fill `config.lua` file in script directory
 ```
 После этого проверьте папку со скриптом на наличие _config.lua_.
  - **Для удобного управления и отслеживания работы скрипта можно
