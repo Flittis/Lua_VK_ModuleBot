@@ -1,85 +1,97 @@
 # Lua_VK_ModuleBot
-
+ 
 ## Описание
 
-Это _модульный_ бот для VK на Lua. Он отличается легким добавлением своих скриптов добавляя соответствующий файл в папку _**modules**_. 
+Это **_модульный_ бот для VK** на Lua. 
+Он отличается лёгкой масштабируемостью путем добавления в папку _**modules**_. 
+Вы с лёгкостью можете отредактировать модули, написать свои, или же отключить готовые просто удаляя файл из папки
 
-Вы можете с легкостью удалить или переместить любой модуль из папки _**modules**_ для отключения определенного скрипта или бота
+_Настройка бота_ осуществляется через файл _**config.lua**_, который автоматически генерируется в зависимости от установленных модулей
 
-Настройка бота осуществляется через файл _**config.lua**_, который автоматически заполняется в зависимости от установленных модулей
+_Работоспособность  бота_ проверена на **Debian/Ubuntu**. 
+На других ОС корректная работа не гарантируется
 
-_Бот написан для **Linux**, работа проверена на **Debian/Ubuntu**. На других системах корректная работа не гарантируется_
+## Установка
 
-## **Во-первых, нужно установить _[LUAJIT](https://luajit.org)_ и _[LuaRocks](https://luarocks.org/)_**
+  **Во-первых, нужно установить _[LUAJIT](https://luajit.org)_ и _[LuaRocks](https://luarocks.org/)_**
 
 - **Если у вас уже установлен Lua5.3 и LuaRocks – нужно удалить:**
 ```
--$ rm -rf /var/cache/luarocks /usr/local/include/lua.hpp /usr/local/include/lua.h /usr/local/etc/luarocks /usr/local/bin/luarocks-admin /usr/local/bin/luarocks /usr/local/bin/lua /usr/local/lib/luarocks /usr/local/lib/lua/5.3 /usr/local/share/lua
+~# rm -rf /var/cache/luarocks /usr/local/include/lua.hpp /usr/local/include/lua.h /usr/local/etc/luarocks /usr/local/bin/luarocks-admin /usr/local/bin/luarocks /usr/local/bin/lua /usr/local/lib/luarocks /usr/local/lib/lua/5.3 /usr/local/share/lua
 ```
 
 - **Устанавливаем инструменты для разработки:**
 ```
--$ sudo apt update
--$ sudo apt upgrade
--$ sudo apt install build-essential libreadline-dev curl libcurl4 libcurl4-openssl-dev
--$ sudo ln -s /usr/include/x86_64-linux-gnu/curl /usr/include/curl
+~# sudo apt update && sudo apt upgrade
+~# sudo apt install build-essential libreadline-dev curl libcurl4 libcurl4-openssl-dev
+~# sudo ln -s /usr/include/x86_64-linux-gnu/curl /usr/include/curl
 ```
 
 - **Устанавливаем _LUAJIT_:**
 ```
--$ git clone https://luajit.org/git/luajit-2.0.git
--$ cd luajit-2.0
--$ git checkout v2.1
--$ sudo make install
--$ ln -sf luajit-2.1.0-beta3 /usr/local/bin/luajit
+~# git clone https://luajit.org/git/luajit-2.0.git
+~# cd luajit-2.0
+~# git checkout v2.1
+~# sudo make install
+~# ln -sf luajit-2.1.0-beta3 /usr/local/bin/luajit
 ```
 - **Устанавливаем _LuaRocks_:**
 ```
--$ wget https://luarocks.org/releases/luarocks-3.3.1.tar.gz
--$ tar zxpf luarocks-3.3.1.tar.gz
--$ cd luarocks-3.3.1
--$ ./configure
--$ make build
--$ sudo make install
-```
-
-- **После установки клонируем репозиторий в корневую папку:**
-```
--$ cd /root
--$ git clone https://github.com/Flittis/Lua_VK_ModuleBot.git
--$ cd Lua_VK_ModuleBot
+~# wget https://luarocks.org/releases/luarocks-3.3.1.tar.gz
+~# tar zxpf luarocks-3.3.1.tar.gz
+~# cd luarocks-3.3.1
+~# ./configure
+~# make build
+~# sudo make install
 ```
 
 - **Устанавливаем библиотеки:**
 ```
--$ luarocks install luautf8
--$ luarocks install dkjson
+~# luarocks install luautf8
+~# luarocks install dkjson
 ```
 
-## Первый запуск
-
-- **Запустите скрипт (при первом запуске будет создан файл конфига с значениями по умолчанию)**
+- **После установки клонируем репозиторий:**
 ```
--$ luajit index.lua    --> [ERROR] Access token in config is not defined
+~# git clone https://github.com/Flittis/Lua_VK_ModuleBot.git
+~# cd Lua_VK_ModuleBot
+```
+
+## Запуск бота
+ - **Запустите скрипт (при первом запуске будет создан файл конфига с значениями по умолчанию)**
+```
+~# luajit index.lua   
+[ERROR] Access token in config is not defined
 ```
 После этого проверьте папку со скриптом на наличие _config.lua_.
+ - **Для удобного управления и отслеживания работы скрипта можно
+   использовать менеджер процессов PM2**
+*Необходим установленный npm!*
+```
+~# sudo apt update && sudo apt install npm
+~# npm install pm2 -g
+```
+ - **Добавляем скрипт в PM2**
+```
+~# pm2 start index.lua --name=LuaBot --interpreter=luajit
+```
+Подробно ознакомиться с функционалом пакетного менеджера, узнать как настроить автозапуск, смотреть логи и т.д. вы можете в официальной документации.
+https://vk.cc/awUBaH
 
 ## Получаем токен
 
 - **Перейдите по ссылке для получения токена с правами на сообщения:**
-https://vk.cc/8E0H4r
+https://vkhost.github.io
+*Для правильной работы бота в фантом-чатах рекомендуется получить токен от **VK Me***
+*Токеном является часть после **access_token=**  до  **&expires_in***
 
-- **Скопируйте ваш токен из адрессной строки (никому его не показывайте)**
+- **Скопируйте ваш токен из адресной строки (никому его не показывайте)**
 ![alt text](https://github.com/Flittis/Lua_VK_ModuleBot/raw/master/tokenScreen.jpg)
-
-- **И потом вставьте ваш токен в файл _config.lua_**
-```
-accessToken = "сюда токен"
-```
 
 ## Настройка бота
 
-Для настройки бота, откройте файл _**config.lua**_, в нем будет несколько строк, в зависимости от количества установленных модулей. 
+Для настройки бота необходимо редактировать файл _**config.lua**_, 
+Его объем зависит от количества установленных модулей
 
 ### Обозначения всех данных в конфиге:
 
@@ -114,8 +126,7 @@ accessToken = "сюда токен"
 - **Розыгрыши (_giveaways.lua_)**
 
 Запуск розыгрыша, в котором для участия нужно будет написать ключевое слово
-
-После завршения, скрипт рандомно выберет победителя
+После завершения, скрипт случайно выбирает победителя
 
 ```
   giveawayStartWord = '!розыгрыш',       -- текст сообщения, при котором будет начинатся розыгрыш ("!розыгрыш <время в минутах> <ключевое слово>" если не указывать время или ключевое слово – будут использовани стандартные значения)
@@ -128,13 +139,15 @@ accessToken = "сюда токен"
 - **Голосовые сообщения (_audiomessages.lua_)**
 
 Отправка голосовых сообщений после отправки имени файла ("!_<название голосового>_" - отправит голосовое из папки _**/audios**_ с именем файла который вы указали)  
+Пример:
   "_**!voice**_" - отправит голосовое _voice.ogg_
 
 А также сохранение чужих голосовых сообщений ("!гс _<название голосового>_" – сохранит голосовое которое вы переслали с этим сообщением под именем которое вы указали)  
-  "_**!гс voice**_" – сохранит пересланное голосовое под именем _voice.ogg_ в папку _**/audios**_ и сразу будет доступно для отправки
+Пример:
+  "_**!гс voice**_" – сохранит пересланное голосовое под именем _voice.ogg_ в папку _**/audios**_
 
 ```
-  audioAdd = '!гс',                      -- текст сообщения, при котором пересланное голосовое сообщение будет сохранено в базу под указаным именем ("!гс тест" -> "!тест" отправит голосовое)
+  audioAdd = '!голосовое',                      -- текст сообщения, при котором пересланное голосовое сообщение будет сохранено в базу под указаным именем ("!гс тест" -> "!тест" отправит голосовое)
   audioReload = '!апдейтгс',             -- триггер, при котором будет обновляться база голосовых сообщений из папки /audios
 ```
 _Для корректной работы файлы должны соответствовать требованиям: **sample rate 16kHz, variable bitrate 16 kbit/s, длительность не более 5 минут, моно.**_
