@@ -27,15 +27,15 @@ local phrases = {
 
 -- Additional functions
 
-function declOfNum(number, titles) return titles[ ((number % 100 > 4 and number % 100 < 20) and 2 or ({2, 0, 1, 1, 1, 2})[((number % 10 < 5) and number % 10 or 5) + 1]) + 1 ] end
-function secToTime(time)
+local function declOfNum(number, titles) return titles[ ((number % 100 > 4 and number % 100 < 20) and 2 or ({2, 0, 1, 1, 1, 2})[((number % 10 < 5) and number % 10 or 5) + 1]) + 1 ] end
+local function secToTime(time)
   local hours = math.floor(time/3600)
   local mins = math.floor(time/60 - (hours*60))
   local secs = math.floor(time - hours*3600 - mins *60)
 
   return ( hours > 0 and hours .. ' ' .. declOfNum(hours, phrases.declensions.hours) .. ' ' or '' ) .. ( mins > 0 and mins .. ' ' .. declOfNum(mins, phrases.declensions.minutes) .. ' ' or '' ) .. ( secs > 0 and secs .. ' ' .. declOfNum(secs, phrases.declensions.seconds) or '' )
 end
-function findWinner(gvObj)
+local function findWinner(gvObj)
   if not gvObj then return end
 
   local ids, count, msgTemplate = {}, 0, ''

@@ -12,8 +12,6 @@ local modules = { message = {}, delete = {}, edit = {} }  -- modules table
 
 -- function to parse module
 function loadModule(name)
-	print(('[LOG]\tLoading module %q'):format(name))
-
 	-- loading module file
 	local chunk, err = loadfile('modules/' .. name)
 
@@ -143,5 +141,6 @@ vk:on('edit', function(edit) for i = 1, #modules.edit do modules.edit[i](edit) e
 -- converting string function to utf-8
 for name, func in pairs(utf8) do if string[name] then string['_' .. name] = string[name];  string[name] = func end end
 
+config.thisUserId = vk.call('users.get')[1]['id']
 -- starting longpoll
 vk.longpollStart()

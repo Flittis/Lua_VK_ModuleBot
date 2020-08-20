@@ -12,8 +12,8 @@ local stickerAddSticker = config.stickerReply.addStickerTrigger or addToConfig('
 local obj, timeout = {}, {}
 
 math.randomseed(os.time())
-function isInArray(a, v) for i = 1, #a do if a[i] == v then return i end end return false end
-function includes(a, v)  for i = 1, #a do if v:find(a[i]) then return true end end return false end
+local function isInArray(a, v) for i = 1, #a do if a[i] == v then return i end end return false end
+local function includes(a, v)  for i = 1, #a do if v:find(a[i]) then return true end end return false end
 
 -- Main function
 
