@@ -39,7 +39,7 @@ function curl_request(url, ua)
 	local res = lib.curl_easy_setopt(h, lib.CURLOPT_URL, url)
 
 	if res == lib.CURLE_OK then res = lib.curl_easy_setopt(h, lib.CURLOPT_WRITEFUNCTION, writefunc)
-		if res == lib.CURLE_OK then res = lib.curl_easy_setopt(h, lib.CURLOPT_TIMEOUT, 20)
+		if res == lib.CURLE_OK then res = lib.curl_easy_setopt(h, lib.CURLOPT_TIMEOUT, 25)
 			if res == lib.CURLE_OK then res = lib.curl_easy_setopt(h, lib.CURLOPT_WRITEDATA, data)
 				if res == lib.CURLE_OK then res = lib.curl_easy_setopt(h, lib.CURLOPT_USERAGENT, ua)
 					if res == lib.CURLE_OK then res = lib.curl_easy_perform(h) end
